@@ -51,6 +51,7 @@ export default function MapWrapper({ city }: { city: string }) {
       (
         node["shop"="florist"](${location.bbox});
         way["shop"="florist"](${location.bbox});
+        relation["shop"="florist"](${location.bbox});
       );
       out body;
       >;
