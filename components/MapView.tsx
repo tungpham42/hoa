@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression, Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -26,6 +27,16 @@ export default function MapView({
   florists: Florist[];
   center: [number, number];
 }) {
+  const [addresses, setAddresses] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    florists.forEach((shop) => {
+      reverseGeocode(shop.lat, shop.lon).then((address) => {
+        setAddresses((prev) => ({ ...prev, [shop.id]: address }));
+      });
+    });
+  }, [florists]);
+
   return (
     <MapContainer
       center={center as LatLngExpression}
@@ -52,7 +63,8 @@ export default function MapView({
                 </Card.Title>
                 <Card.Text className="text-muted small mb-0">
                   <i className="bi bi-geo-alt me-1"></i>
-                  {shop.lat.toFixed(4)}, {shop.lon.toFixed(4)}
+                  {addresses[shop.id] ||
+                    `${shop.lat.toFixed(4)}, ${shop.lon.toFixed(4)}`}
                 </Card.Text>
               </Card.Body>
             </Card>
@@ -61,4 +73,12 @@ export default function MapView({
       ))}
     </MapContainer>
   );
+}
+
+async function reverseGeocode(lat: number, lon: number): Promise<string> {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+  );
+  const data = await res.json();
+  return data.display_name || "Không tìm thấy địa chỉ";
 }
