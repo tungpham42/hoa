@@ -71,6 +71,14 @@ a:hover {
   color: var(--accent);
 }
 
+.text-primary {
+  color: var(--accent) !important;
+}
+
+.bg-primary {
+  background-color: var(--accent) !important;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

@@ -3,7 +3,7 @@
 import MapWrapper from "@/components/MapWrapper";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Container, Form, Alert } from "react-bootstrap";
+import { Container, Form, Alert, Card, Spinner } from "react-bootstrap";
 
 type Location = {
   bbox: string;
@@ -38,21 +38,19 @@ export default function HomePage() {
         transition={{ duration: 0.5 }}
         className="text-center mt-5"
       >
-        <Alert variant="danger">{error}</Alert>
+        <Alert variant="danger">
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+          {error}
+        </Alert>
       </motion.div>
     );
   }
 
   if (!locations) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mt-5"
-      >
-        Đang tải danh sách tỉnh/thành phố...
-      </motion.div>
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner animation="border" variant="primary" />
+      </div>
     );
   }
 
@@ -62,22 +60,41 @@ export default function HomePage() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Container className="py-5">
-        <h1 className="text-center mb-4 fs-1">🌸 Tìm Cửa Hàng Bán Hoa</h1>
-        <Form.Group className="mb-4 mx-auto" style={{ maxWidth: "400px" }}>
-          <Form.Label className="fs-5">Chọn tỉnh/thành phố:</Form.Label>
-          <Form.Select
-            id="city-select"
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-          >
-            {Object.keys(locations).map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
+      <Container className="py-4">
+        <Card className="border-0 shadow-sm mb-4">
+          <Card.Body className="text-center py-4">
+            <h1 className="display-5 mb-3 text-primary">
+              <i className="bi bi-flower2 me-2"></i>
+              Tìm Cửa Hàng Bán Hoa
+            </h1>
+            <p className="lead text-muted">
+              Khám phá các cửa hàng hoa tươi đẹp nhất tại thành phố của bạn
+            </p>
+          </Card.Body>
+        </Card>
+
+        <Card className="border-0 shadow-sm mb-4">
+          <Card.Body>
+            <Form.Group>
+              <Form.Label className="fw-bold mb-2">
+                <i className="bi bi-geo-alt-fill me-2 text-primary"></i>
+                Chọn tỉnh/thành phố:
+              </Form.Label>
+              <Form.Select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="form-select-lg"
+              >
+                {Object.keys(locations).map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Card.Body>
+        </Card>
+
         <MapWrapper city={selectedCity} />
       </Container>
     </motion.main>

@@ -1,12 +1,22 @@
+// MapWrapper.tsx
 "use client";
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Spinner, Alert } from "react-bootstrap";
+import { Spinner, Alert, Card } from "react-bootstrap";
 import { motion } from "framer-motion";
 
 const MapView = dynamic(() => import("./MapView"), {
   ssr: false,
+  loading: () => (
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ height: "500px" }}
+    >
+      <Spinner animation="grow" variant="primary" />
+      <span className="ms-2">Đang tải bản đồ...</span>
+    </div>
+  ),
 });
 
 type Florist = {
@@ -38,7 +48,7 @@ export default function MapWrapper({ city }: { city: string }) {
       .then((data: Record<string, Location>) => setLocations(data))
       .catch((err) => {
         console.error("Error fetching locations:", err);
-        setError("Lỗi khi tải dữ liệu vị trí.");
+        setError("Không thể tải dữ liệu vị trí. Vui lòng thử lại sau.");
       });
   }, []);
 
@@ -68,7 +78,6 @@ export default function MapWrapper({ city }: { city: string }) {
         return res.json();
       })
       .then((data) => {
-        console.log(`Overpass API response for ${city}:`, data);
         if (data.elements && data.elements.length > 0) {
           const floristNodes = data.elements.filter(
             (element: Florist) =>
@@ -94,26 +103,45 @@ export default function MapWrapper({ city }: { city: string }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center mt-5"
       >
-        <Alert variant="danger">{error}</Alert>
+        <Alert variant="danger" className="text-center">
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+          {error}
+        </Alert>
       </motion.div>
     );
   }
 
   if (!florists || !locations) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mt-5"
-      >
-        <Spinner animation="border" role="status" />
-        <div className="mt-2">Đang tải dữ liệu cửa hàng hoa...</div>
-      </motion.div>
+      <Card className="text-center p-4 border-0 shadow-sm">
+        <Card.Body>
+          <Spinner animation="border" variant="primary" />
+          <Card.Text className="mt-3">
+            Đang tải dữ liệu cửa hàng hoa...
+          </Card.Text>
+        </Card.Body>
+      </Card>
     );
   }
 
-  return <MapView florists={florists} center={locations[city].center} />;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <Card.Header className="bg-primary text-white">
+          <h5 className="mb-0">
+            <i className="bi bi-geo-alt-fill me-2"></i>
+            Cửa hàng hoa tại {city}
+          </h5>
+        </Card.Header>
+        <Card.Body className="p-0">
+          <MapView florists={florists} center={locations[city].center} />
+        </Card.Body>
+      </Card>
+    </motion.div>
+  );
 }

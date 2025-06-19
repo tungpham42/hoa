@@ -3,7 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression, Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { motion } from "framer-motion";
+import { Card } from "react-bootstrap";
 
 type Florist = {
   id: number;
@@ -14,9 +14,9 @@ type Florist = {
 
 const floristIcon = new Icon({
   iconUrl: "/florist.png",
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
-  popupAnchor: [0, -30],
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
 });
 
 export default function MapView({
@@ -27,35 +27,38 @@ export default function MapView({
   center: [number, number];
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5 }}
-      className="border rounded-3 shadow"
+    <MapContainer
+      center={center as LatLngExpression}
+      zoom={14}
+      style={{ height: "500px", width: "100%" }}
+      className="border-0"
     >
-      <MapContainer
-        center={center as LatLngExpression}
-        zoom={14}
-        style={{ height: "500px", width: "100%" }}
-      >
-        <TileLayer
-          attribution='© <a href="https://osm.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {florists.map((shop) => (
-          <Marker
-            key={shop.id}
-            position={[shop.lat, shop.lon]}
-            icon={floristIcon}
-          >
-            <Popup>
-              <div className="fw-semibold">
-                {shop.tags?.name || "Cửa hàng hoa không tên"}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-    </motion.div>
+      <TileLayer
+        attribution='© <a href="https://osm.org/copyright" class="text-decoration-none">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {florists.map((shop) => (
+        <Marker
+          key={shop.id}
+          position={[shop.lat, shop.lon]}
+          icon={floristIcon}
+        >
+          <Popup className="rounded-3">
+            <Card className="border-0 shadow-sm">
+              <Card.Body className="p-2">
+                <Card.Title className="fs-6 text-primary mb-1">
+                  <i className="bi bi-flower1 me-1"></i>
+                  {shop.tags?.name || "Cửa hàng hoa không tên"}
+                </Card.Title>
+                <Card.Text className="text-muted small mb-0">
+                  <i className="bi bi-geo-alt me-1"></i>
+                  {shop.lat.toFixed(4)}, {shop.lon.toFixed(4)}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
 }
