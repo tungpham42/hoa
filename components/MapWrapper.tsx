@@ -13,7 +13,8 @@ type Florist = {
   id: number;
   lat: number;
   lon: number;
-  tags?: { name?: string };
+  type: string;
+  tags?: { name?: string; shop?: string };
 };
 
 type Location = {
@@ -46,9 +47,14 @@ export default function MapWrapper({ city }: { city: string }) {
 
     const location = locations[city] || locations["TP. Hồ Chí Minh"];
     const query = `
-      [out:json];
-      node["shop"="florist"]["name"](${location.bbox});
+      [out:json][timeout:25];
+      (
+        node["shop"="florist"](${location.bbox});
+        way["shop"="florist"](${location.bbox});
+      );
       out body;
+      >;
+      out skel qt;
     `;
     setFlorists(null);
     setError(null);
@@ -63,7 +69,14 @@ export default function MapWrapper({ city }: { city: string }) {
       .then((data) => {
         console.log(`Overpass API response for ${city}:`, data);
         if (data.elements && data.elements.length > 0) {
-          setFlorists(data.elements);
+          const floristNodes = data.elements.filter(
+            (element: Florist) =>
+              element.type === "node" && element.lat && element.lon
+          );
+          setFlorists(floristNodes);
+          if (floristNodes.length === 0) {
+            setError(`Không tìm thấy cửa hàng hoa nào ở ${city}.`);
+          }
         } else {
           setError(`Không tìm thấy cửa hàng hoa nào ở ${city}.`);
         }
